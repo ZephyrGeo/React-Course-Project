@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 
 const tempMovieData = [
   {
@@ -56,17 +56,26 @@ export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsLoading] = useState(false);
-  const query = "star";
+  const [error, setError] = useState("");
+  const query = "sddsd";
 
   useEffect(function () {
     async function fetchMovies() {
-      setIsLoading(true);
-      const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-      );
-      const data = await res.json();
-      setMovies(data.Search);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+        );
+        if (!res.ok) throw new Error("Something wrong with data fetching.");
+
+        const data = await res.json();
+        if (data.Response === "False") throw new Error("Movies not found.");
+        setMovies(data.Search);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
     }
     fetchMovies();
   }, []);
@@ -78,7 +87,13 @@ export default function App() {
         <NumResults movies={movies} />
       </NavBar>
       <Main>
-        <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box>
+        <Box>
+          {/* {isLoading ? <Loader /> : <MovieList movies={movies} />}
+           */}
+          {isLoading && <Loader />}
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
+        </Box>
         <Box>
           <WatchedSummary watched={watched} />
           <WatchedMoviesList watched={watched} />
@@ -91,7 +106,11 @@ export default function App() {
 function Loader() {
   return <p className="loader">Loading...</p>;
 }
-function NavBar({ children }) {
+
+function ErrorMessage({message}) {
+  return <p className="error">{message}</p>;
+}
+function NavBar({children}) {
   return (
     <nav className="nav-bar">
       <Logo />
@@ -123,7 +142,7 @@ function Search() {
   );
 }
 
-function NumResults({ movies }) {
+function NumResults({movies}) {
   return (
     <p className="num-results">
       Found <strong>{movies.length}</strong> results
@@ -131,11 +150,11 @@ function NumResults({ movies }) {
   );
 }
 
-function Main({ children }) {
+function Main({children}) {
   return <main className="main">{children}</main>;
 }
 
-function Box({ children }) {
+function Box({children}) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -148,7 +167,7 @@ function Box({ children }) {
   );
 }
 
-function MovieList({ movies }) {
+function MovieList({movies}) {
   return (
     <ul className="list">
       {movies?.map((movie) => (
@@ -158,7 +177,7 @@ function MovieList({ movies }) {
   );
 }
 
-function Movie({ movie }) {
+function Movie({movie}) {
   return (
     <li key={movie.imdbID}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
@@ -173,7 +192,7 @@ function Movie({ movie }) {
   );
 }
 
-function WatchedSummary({ watched }) {
+function WatchedSummary({watched}) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
   const avgRuntime = average(watched.map((movie) => movie.runtime));
@@ -202,7 +221,7 @@ function WatchedSummary({ watched }) {
   );
 }
 
-function WatchedMoviesList({ watched }) {
+function WatchedMoviesList({watched}) {
   return (
     <ul className="list">
       {watched.map((movie) => (
@@ -212,7 +231,7 @@ function WatchedMoviesList({ watched }) {
   );
 }
 
-function WatchedMovie({ movie }) {
+function WatchedMovie({movie}) {
   return (
     <li key={movie.imdbID}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
