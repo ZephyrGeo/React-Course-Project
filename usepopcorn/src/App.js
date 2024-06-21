@@ -1,4 +1,5 @@
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
+import StarRating from "./StarRating";
 
 const tempMovieData = [
   {
@@ -116,7 +117,7 @@ export default function App() {
         </Box>
         <Box>
           {selectedId ? (
-            <MoiveDetails
+            <MovieDetails
               selectedId={selectedId}
               onCloseMoive={handleCloseMovie}
             />
@@ -136,10 +137,10 @@ function Loader() {
   return <p className="loader">Loading...</p>;
 }
 
-function ErrorMessage({message}) {
+function ErrorMessage({ message }) {
   return <p className="error">{message}</p>;
 }
-function NavBar({children}) {
+function NavBar({ children }) {
   return (
     <nav className="nav-bar">
       <Logo />
@@ -157,7 +158,7 @@ function Logo() {
   );
 }
 
-function Search({query, setQuery}) {
+function Search({ query, setQuery }) {
   return (
     <input
       className="search"
@@ -169,7 +170,7 @@ function Search({query, setQuery}) {
   );
 }
 
-function NumResults({movies}) {
+function NumResults({ movies }) {
   return (
     <p className="num-results">
       Found <strong>{movies.length}</strong> results
@@ -177,11 +178,11 @@ function NumResults({movies}) {
   );
 }
 
-function Main({children}) {
+function Main({ children }) {
   return <main className="main">{children}</main>;
 }
 
-function Box({children}) {
+function Box({ children }) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -194,7 +195,7 @@ function Box({children}) {
   );
 }
 
-function MovieList({movies, onSelectMovie}) {
+function MovieList({ movies, onSelectMovie }) {
   return (
     <ul className="list list-movies">
       {movies?.map((movie) => (
@@ -204,7 +205,7 @@ function MovieList({movies, onSelectMovie}) {
   );
 }
 
-function Movie({movie, onSelectMovie}) {
+function Movie({ movie, onSelectMovie }) {
   return (
     <li key={movie.imdbID} onClick={() => onSelectMovie(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
@@ -219,7 +220,7 @@ function Movie({movie, onSelectMovie}) {
   );
 }
 
-function WatchedSummary({watched}) {
+function WatchedSummary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
   const avgRuntime = average(watched.map((movie) => movie.runtime));
@@ -248,7 +249,7 @@ function WatchedSummary({watched}) {
   );
 }
 
-function WatchedMoviesList({watched}) {
+function WatchedMoviesList({ watched }) {
   return (
     <ul className="list">
       {watched.map((movie) => (
@@ -258,7 +259,7 @@ function WatchedMoviesList({watched}) {
   );
 }
 
-function WatchedMovie({movie}) {
+function WatchedMovie({ movie }) {
   return (
     <li key={movie.imdbID}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
@@ -281,8 +282,9 @@ function WatchedMovie({movie}) {
   );
 }
 
-function MoiveDetails({selectedId, onCloseMoive}) {
+function MovieDetails({ selectedId, onCloseMoive }) {
   const [movie, setMovies] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const {
     Title: title,
@@ -300,7 +302,8 @@ function MoiveDetails({selectedId, onCloseMoive}) {
   // ! 再次使用useEffect获取movie detail，要注意 url params => i
   useEffect(
     function () {
-      async function getMoiveDetails() {
+      async function getMovieDetails() {
+        setLoading(true);
         const res = await fetch(
           `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
         );
@@ -308,25 +311,47 @@ function MoiveDetails({selectedId, onCloseMoive}) {
         const data = await res.json();
         setMovies(data);
         console.log(data);
+        setLoading(false);
       }
-      getMoiveDetails();
+      getMovieDetails();
     },
-    [movie]
+    [selectedId]
   );
   return (
     <div className="details">
-      <header>
-        <button className="btn-back" onClick={onCloseMoive}>
-          &larr;
-        </button>
-        <img src={poster} alt={`Poster of ${movie} movie`} />
-        <div className="details-overview">
-          <h2>{title}</h2>
-          <p>
-            {released} &bull; {runtime}
-          </p>
-        </div>
-      </header>
+      {loading ? (
+        <Loader />
+      ) : (
+        <>
+          <header>
+            <button className="btn-back" onClick={onCloseMoive}>
+              &larr;
+            </button>
+            <img src={poster} alt={`Poster of ${movie} movie`} />
+            <div className="details-overview">
+              <h2>{title}</h2>
+              <p>
+                {released} &bull; {runtime}
+              </p>
+              <p>
+                <span>🌟</span>
+                IMDB Rating {imdbRating}
+              </p>
+            </div>
+          </header>
+
+          <section>
+            <div className="rating">
+              <StarRating maxRating={10} size={24} />
+            </div>
+            <p>
+              <em>{plot}</em>
+            </p>
+            <p>Starring {actors}</p>
+            <p>Directed by {director}</p>
+          </section>
+        </>
+      )}
     </div>
   );
 }
