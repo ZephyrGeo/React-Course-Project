@@ -9,7 +9,6 @@ const ContainerStyle = {
 
 const ContainerStarStyle = {
   display: "flex",
-  gap: "5px",
 };
 
 StarRating.propTypes = {
