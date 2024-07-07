@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useState} from "react";
 import PropTypes from "prop-types";
 
 const ContainerStyle = {
@@ -13,14 +13,18 @@ const ContainerStarStyle = {
 
 StarRating.propTypes = {
   maxRating: PropTypes.number,
+  onSetRating: PropTypes.func,
 };
 
 export default function StarRating({
   maxRating = 5,
   color = "#fcc419",
   size = 48,
+  defaultRating,
+  className = "",
+  onSetRating,
 }) {
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(defaultRating);
   const [tempRating, setTempRating] = useState(0);
 
   const textStyle = {
@@ -32,12 +36,13 @@ export default function StarRating({
 
   function handleRating(rating) {
     setRating(rating);
+    onSetRating(rating);
   }
 
   return (
-    <div style={ContainerStyle}>
+    <div style={ContainerStyle} className={className}>
       <div style={ContainerStarStyle}>
-        {Array.from({ length: maxRating }, (_, i) => (
+        {Array.from({length: maxRating}, (_, i) => (
           <Star
             onRating={() => handleRating(i + 1)}
             full={tempRating ? tempRating >= i + 1 : rating >= i + 1}
@@ -54,7 +59,7 @@ export default function StarRating({
   );
 }
 
-function Star({ onRating, full, color, size, onHoverIn, onHoverOut }) {
+function Star({onRating, full, color, size, onHoverIn, onHoverOut}) {
   const starStyle = {
     height: `${size}px`,
     width: `${size}px`,
