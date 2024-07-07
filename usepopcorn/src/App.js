@@ -251,7 +251,7 @@ function WatchedSummary({watched}) {
         </p>
         <p>
           <span>🌟</span>
-          <span>{avgUserRating.toFixed(2)}</span>
+          <span>{avgUserRating.toFixed}</span>
         </p>
         <p>
           <span>⏳</span>
@@ -371,6 +371,13 @@ function MovieDetails({
     [selectedId]
   );
 
+  useEffect(
+    function () {
+      if (!title) return;
+      document.title = `Movie: ${title}`;
+    },
+    [title]
+  );
   return (
     <div className="details">
       {loading ? (
