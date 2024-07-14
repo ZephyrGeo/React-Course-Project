@@ -80,20 +80,27 @@ export default function App() {
   //! useEffect获取movies url params => s
   useEffect(
     function () {
+      const controller = new AbortController();
       async function fetchMovies() {
         try {
           setIsLoading(true);
           setError("");
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            {
+              signal: controller.signal,
+            }
           );
           if (!res.ok) throw new Error("Something wrong with data fetching.");
 
           const data = await res.json();
           if (data.Response === "False") throw new Error("Movies not found.");
           setMovies(data.Search);
+          setError("");
         } catch (err) {
-          setError(err.message);
+          if (err.name !== "AbortError") {
+            setError(err.message);
+          }
         } finally {
           setIsLoading(false);
         }
@@ -103,6 +110,10 @@ export default function App() {
         setError("");
       }
       fetchMovies();
+
+      return function () {
+        controller.abort();
+      };
     },
     [query]
   );
@@ -251,7 +262,7 @@ function WatchedSummary({watched}) {
         </p>
         <p>
           <span>🌟</span>
-          <span>{avgUserRating.toFixed}</span>
+          <span>{avgUserRating.toFixed(2)}</span>
         </p>
         <p>
           <span>⏳</span>
@@ -363,7 +374,7 @@ function MovieDetails({
 
         const data = await res.json();
         setMovies(data);
-        console.log(data);
+        // console.log(data);
         setLoading(false);
       }
       getMovieDetails();
