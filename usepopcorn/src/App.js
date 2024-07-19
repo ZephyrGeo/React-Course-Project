@@ -54,7 +54,7 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
-  const [query, setQuery] = useState("star");
+  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -108,7 +108,10 @@ export default function App() {
       if (query.length < 3) {
         setMovies([]);
         setError("");
+        return;
       }
+
+      handleCloseMovie();
       fetchMovies();
 
       return function () {
@@ -316,13 +319,7 @@ function WatchedMovie({movie, onDeletedWatched}) {
   );
 }
 
-function MovieDetails({
-  selectedId,
-  onCloseMoive,
-  onAddWatched,
-
-  watched,
-}) {
+function MovieDetails({selectedId, onCloseMoive, onAddWatched, watched}) {
   const [movie, setMovies] = useState({});
   const [loading, setLoading] = useState(false);
   const [userRating, setUserRating] = useState("");
@@ -363,6 +360,23 @@ function MovieDetails({
     onCloseMoive();
   }
 
+  useEffect(
+    function () {
+      function callback(e) {
+        if (e.code === "Escape") {
+          onCloseMoive();
+          console.log("closing");
+        }
+      }
+      document.addEventListener("keydown", callback);
+
+      return function () {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [onCloseMoive]
+  );
+
   // ! 再次使用useEffect获取movie detail，要注意 url params => i
   useEffect(
     function () {
@@ -393,6 +407,7 @@ function MovieDetails({
     },
     [title]
   );
+
   return (
     <div className="details">
       {loading ? (
