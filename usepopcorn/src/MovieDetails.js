@@ -1,10 +1,11 @@
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import StarRating from "./StarRating";
 import Loader from "./Loader";
+import {useKey} from "./useKey";
 
 function MovieDetails({
   selectedId,
-  onCloseMoive,
+  onCloseMovie,
   onAddWatched,
   watched,
   keyId,
@@ -12,6 +13,15 @@ function MovieDetails({
   const [movie, setMovies] = useState({});
   const [loading, setLoading] = useState(false);
   const [userRating, setUserRating] = useState("");
+
+  const countRef = useRef(0);
+
+  useEffect(
+    function () {
+      if (userRating) countRef.current++;
+    },
+    [userRating]
+  );
 
   const isWatched = watched
     .map((watched) => watched.imdbID)
@@ -43,28 +53,14 @@ function MovieDetails({
       imdbRating: Number(imdbRating),
       runtime: runtime.split(" ")[0],
       userRating,
+      countRatingDecisions: countRef.current,
     };
     // ! 为什么不能放在最外层
     onAddWatched(newWatchedMovie);
-    onCloseMoive();
+    onCloseMovie();
   }
 
-  useEffect(
-    function () {
-      function callback(e) {
-        if (e.code === "Escape") {
-          onCloseMoive();
-          console.log("closing");
-        }
-      }
-      document.addEventListener("keydown", callback);
-
-      return function () {
-        document.removeEventListener("keydown", callback);
-      };
-    },
-    [onCloseMoive]
-  );
+  useKey("Escape", onCloseMovie);
 
   // ! 再次使用useEffect获取movie detail，要注意 url params => i
   useEffect(
@@ -103,7 +99,7 @@ function MovieDetails({
       ) : (
         <>
           <header>
-            <button className="btn-back" onClick={onCloseMoive}>
+            <button className="btn-back" onClick={onCloseMovie}>
               &larr;
             </button>
             <img src={poster} alt={`Poster of ${movie} movie`} />
