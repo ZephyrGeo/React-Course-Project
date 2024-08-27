@@ -1,10 +1,14 @@
-import DateCounter from "./DateCounter";
+import Header from "./Header";
+import Main from "./Main";
 
 export default function App() {
   return (
     <div className="App">
-      <h1>React Date Counter</h1>
-      <DateCounter />
+      <Header />
+      <Main>
+        <p>1/15</p>
+        <p>Qusetion?</p>
+      </Main>
     </div>
   );
 }
