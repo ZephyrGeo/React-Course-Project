@@ -1,6 +1,6 @@
 import Header from "./Header";
 import Main from "./Main";
-import {useEffect, useReducer} from "react";
+import { useEffect, useReducer } from "react";
 import Loader from "./Loader";
 import Error from "./Error";
 import StartScreen from "./StartScreen";
@@ -37,9 +37,14 @@ function reducer(state, action) {
         status: "active",
       };
     case "newAnswer":
+      const question = state.questions.at(state.index);
       return {
         ...state,
         answer: action.payload,
+        points:
+          action.payload === question.correctOption
+            ? state.points + question.points
+            : state.points,
       };
     case "nextQuestion":
       return {
@@ -54,12 +59,18 @@ function reducer(state, action) {
         highscore:
           state.points > state.highscore ? state.points : state.highscore,
       };
+    case "restart":
+      return {
+        ...initalState,
+        questions: state.questions,
+        status: "ready",
+      };
     default:
       throw new Error("ACTION UNKNOWN");
   }
 }
 export default function App() {
-  const [{questions, status, index, answer, points, highscore}, dispatch] =
+  const [{ questions, status, index, answer, points, highscore }, dispatch] =
     useReducer(reducer, initalState);
   const numQuestions = questions.length;
   const maxPossiblePoints = questions.reduce(
@@ -70,8 +81,8 @@ export default function App() {
   useEffect(function () {
     fetch("http://localhost:8000/questions")
       .then((res) => res.json())
-      .then((data) => dispatch({type: "dataReceived", payload: data}))
-      .catch((err) => dispatch({type: "dataFailed"}));
+      .then((data) => dispatch({ type: "dataReceived", payload: data }))
+      .catch((err) => dispatch({ type: "dataFailed" }));
   }, []);
 
   return (
@@ -110,6 +121,7 @@ export default function App() {
             points={points}
             maxPOssiblePoints={maxPossiblePoints}
             highscore={highscore}
+            dispatch={dispatch}
           />
         )}
       </Main>
