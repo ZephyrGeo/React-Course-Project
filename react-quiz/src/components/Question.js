@@ -1,5 +1,5 @@
 import Options from "./Options";
-function Question({ question }) {
+function Question({ question, answer, dispatch }) {
   const {
     id,
     question: questionText,
@@ -10,7 +10,12 @@ function Question({ question }) {
   return (
     <div>
       <h4>{questionText}</h4>
-      <Options options={options} />
+      <Options
+        options={options}
+        answer={answer}
+        dispatch={dispatch}
+        correctOption={correctOption}
+      />
     </div>
   );
 }
