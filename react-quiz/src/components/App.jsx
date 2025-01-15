@@ -119,7 +119,7 @@ export default function App() {
         {status === "finished" && (
           <FinishScreen
             points={points}
-            maxPOssiblePoints={maxPossiblePoints}
+            maxPossiblePoints={maxPossiblePoints}
             highscore={highscore}
             dispatch={dispatch}
           />
