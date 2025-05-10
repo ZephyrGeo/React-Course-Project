@@ -1,0 +1,24 @@
+import styles from "./CityItem.module.css";
+
+const formatDate = (date) => {
+  return new Intl.DateTimeFormat("en", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(date));
+};
+
+function CityItem({ city }) {
+  const { cityName, emoji, date } = city;
+
+  return (
+    <li className={styles.cityItem}>
+      <span className={styles.emoji}>{emoji}</span>
+      <span className={styles.name}>{cityName}</span>
+      <time className={styles.date}>{formatDate(date)}</time>
+      <button className={styles.deleteBtn}>&times;</button>
+    </li>
+  );
+}
+
+export default CityItem;
